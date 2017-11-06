@@ -1,8 +1,10 @@
-import networkx as nx
-import matplotlib.pyplot as plt
+# import networkx as nx
+# import matplotlib.pyplot as plt
 from DIG import DottedIntervalGraph as DIG
 
-G = DIG(5)
+G = DIG()
+
+G.construct_nodes(5)
 
 G.print_graph()
 
