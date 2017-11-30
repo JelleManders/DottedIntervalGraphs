@@ -59,6 +59,15 @@ class DottedIntervalGraph():
 		@return bool
 		"""
 		return False
+
+	def order(self):
+		"""
+		networkx calls this function when calling nx.diameter(),
+		This function is implemented to prevent AttributeErrors
+
+		@return int
+		"""
+		return len(self)
 		
 	def add_sequence(self, name, sequence):
 		"""
@@ -120,10 +129,10 @@ class DottedIntervalGraph():
 		(offset1, period1, steps1) = self.nodedict[name1]
 		(offset2, period2, steps2) = self.nodedict[name2]
 		# construct set, check for item in other set if in first set
-		set1 = [offset1 + x * period1 for x in range(0, steps1)]
-		set2 = [offset2 + x * period2 for x in range(0, steps2)]
-		if set(set1).isdisjoint(set2):
-			return False
+		dotlist = [offset1 + x * period1 for x in range(0, steps1)]
+		for dot in [offset2 + x * period2 for x in range(0, steps2)]:
+			if dot in dotlist:
+				return False
 		return True
 
 	def image(self, filename = "graph.png", circular = True):

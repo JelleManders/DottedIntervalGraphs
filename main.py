@@ -11,4 +11,4 @@ def c5():
 G = c5();
 # G.image()
 
-print(nx.graph_clique_number(G))
+print("Clique: ", nx.graph_clique_number(G))
