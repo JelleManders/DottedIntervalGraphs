@@ -1,4 +1,5 @@
 from DIG import DottedIntervalGraph as DIG
+import networkx as nx
 
 def c5():
 	G = DIG()
@@ -6,5 +7,8 @@ def c5():
 		G.add_sequence(node, sequence)
 	return G
 
+# G = nx.dodecahedral_graph()
 G = c5();
-G.image()
+# G.image()
+
+print(nx.graph_clique_number(G))

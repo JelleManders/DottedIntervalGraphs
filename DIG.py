@@ -1,3 +1,11 @@
+##
+#  DIG.py
+#  Class that implements the Dotted Interval Graph datastructure
+#
+#  @author Jelle Manders - github.com/jellemanders
+#  @date   2017-11
+##
+
 from itertools import combinations
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -26,8 +34,22 @@ class DottedIntervalGraph():
 		
 		@return __iter__
 		"""
-		for node in self.nodedict:
-			yield node
+		return iter(self.nodedict)
+
+	def __getitem__(self, key):
+		try:
+			return self.nodedict[key]
+		except KeyError:
+			raise KeyError
+
+	def is_multigraph(self):
+		"""
+		networkx calls this function in nx.graph_clique_number(),
+		This function is implemented to prevent AttributeErrors
+		
+		@return bool
+		"""
+		return False
 
 	def is_directed(self):
 		"""
@@ -42,8 +64,8 @@ class DottedIntervalGraph():
 		"""
 		adds node to datastructure, with a name and sequence
 		
-		@var name = int
-		@var sequence = tuple(int, int, int)
+		@param name = int
+		@param sequence = tuple(int, int, int)
 		"""
 		self.nodedict[name] = sequence
 
@@ -51,7 +73,7 @@ class DottedIntervalGraph():
 		"""
 		removes node from datastructure
 		
-		@var name = int
+		@param name = int
 		"""
 		del self.nodedict[name]
 
@@ -91,13 +113,13 @@ class DottedIntervalGraph():
 		"""
 		returns a bool indicating the presence of an edge between the two nodes
 		
-		@var name1 = int
-		@var name2 = int
+		@param name1 = int
+		@param name2 = int
 		@return bool
 		"""
 		(offset1, period1, steps1) = self.nodedict[name1]
 		(offset2, period2, steps2) = self.nodedict[name2]
-
+		# construct set, check for item in other set if in first set
 		set1 = [offset1 + x * period1 for x in range(0, steps1)]
 		set2 = [offset2 + x * period2 for x in range(0, steps2)]
 		if set(set1).isdisjoint(set2):
@@ -109,8 +131,8 @@ class DottedIntervalGraph():
 		stores the current graph in an image, default locations is <graph.png>,
 		default draw setting is circular
 
-		@var filename = string
-		@var circular = bool
+		@param filename = string
+		@param circular = bool
 		"""
 		fig = plt.figure()
 		if circular:
