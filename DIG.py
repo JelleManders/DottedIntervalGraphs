@@ -7,8 +7,8 @@
 ##
 
 from itertools import combinations
-import networkx as nx
 import matplotlib.pyplot as plt
+import networkx as nx
 
 class DottedIntervalGraph():
 	"""
@@ -91,18 +91,22 @@ class DottedIntervalGraph():
 	#      seems to be unnecessary"""
 	# 	return self.nodedict
 
-	def edges(self):
-		"""
-		returns an iterator over all edges in the graph
-		
-		@return __iter__
-		"""
+	def graph_edges(self):
 		graph_edges = []
 		for node1, node2 in combinations(self.nodedict.items(), 2):
 			name1 = node1[0]
 			name2 = node2[0]
 			if self.has_edge(name1, name2):
 				graph_edges.append((name1, name2))
+		return graph_edges
+
+	def edges(self):
+		"""
+		returns an iterator over all edges in the graph
+		
+		@return __iter__
+		"""
+		graph_edges = self.graph_edges()
 		for edge in graph_edges:
 			yield edge
 	
@@ -132,8 +136,8 @@ class DottedIntervalGraph():
 		dotlist = [offset1 + x * period1 for x in range(0, steps1)]
 		for dot in [offset2 + x * period2 for x in range(0, steps2)]:
 			if dot in dotlist:
-				return False
-		return True
+				return True
+		return False
 
 	def image(self, filename = "graph.png", circular = True):
 		"""
