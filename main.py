@@ -1,6 +1,6 @@
 from DIG import DottedIntervalGraph as DIG
 import networkx as nx
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 complete5 = nx.complete_graph(5)
 
@@ -12,9 +12,9 @@ def c5():
 
 # G = nx.dodecahedral_graph()
 G = c5();
-G.image()
+# G.image()
 
-print(set(complete5), set(G))
+# print(set(complete5), set(G))
 
 print("Clique complete:", nx.graph_clique_number(complete5))
 print("Clique c5:", nx.graph_clique_number(G))

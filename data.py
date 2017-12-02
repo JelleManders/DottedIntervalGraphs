@@ -54,7 +54,7 @@ def make_figure(node_range, iter_range):
 	fig = plt.figure()
 	plt.title("Likelihood of edge over amount of nodes and number of iterations")
 	plt.xlabel("number of iterations in all sequences")
-	plt.ylabel("likelihood of edge between any pair of vertices")
+	plt.ylabel("likelihood of edge between any pair of vertices (%)")
 	plt.grid(True)
 	colors = {5:'bo',10:'go',15:'ro',20:'yo',25:'co'}
 	blue = mpatch.Patch(color='blue', label='nodes = 5')
@@ -62,7 +62,7 @@ def make_figure(node_range, iter_range):
 	red = mpatch.Patch(color='red', label='nodes = 15')
 	yellow = mpatch.Patch(color='yellow', label='nodes = 20')
 	cyan = mpatch.Patch(color='cyan', label='nodes = 25')
-	plt.legend(handles=[blue,green,red,yellow,cyan])
+	plt.legend(handles=[blue,green,red,yellow,cyan], loc=4)
 	for nodes in node_range:
 		for iterations in iter_range:
 			this_result = test_results["n="+str(nodes)+",i="+str(iterations)]
@@ -70,8 +70,8 @@ def make_figure(node_range, iter_range):
 			x = iterations
 			y = 100 * np.mean(this_result) / (nodes*(nodes-1)/2)
 			yerror = np.std(this_result)
-			plt.plot(x, y, c, markersize=30-nodes)
-			# plt.errorbar(x, y, yerr=yerror)
+			plt.plot(x, y, c, markersize=(30-nodes)/2)
+			plt.errorbar(x, y, yerr=yerror, color=c[0], capsize=5)
 			# print("plotting", nodes, iterations, y)
 	fig.savefig("plot.png")
 	plt.show()

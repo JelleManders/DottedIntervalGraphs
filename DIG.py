@@ -86,11 +86,6 @@ class DottedIntervalGraph():
 		"""
 		del self.nodedict[name]
 
-	# def nodes(self):
-	# 	"""returns an iterator over all nodes in the graph
-	#      seems to be unnecessary"""
-	# 	return self.nodedict
-
 	def graph_edges(self):
 		graph_edges = []
 		for node1, node2 in combinations(self.nodedict.items(), 2):
