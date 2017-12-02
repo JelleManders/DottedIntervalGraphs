@@ -17,4 +17,4 @@ G.image()
 print(set(complete5), set(G))
 
 print("Clique complete:", nx.graph_clique_number(complete5))
-print("Clique:", nx.graph_clique_number(G))
+print("Clique c5:", nx.graph_clique_number(G))
