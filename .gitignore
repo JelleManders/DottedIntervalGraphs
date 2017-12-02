@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# pickled files
+*.pickle
+
+# images and figures
+*.png
+
 # C extensions
 *.so
 
