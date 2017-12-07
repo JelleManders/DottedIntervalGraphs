@@ -7,8 +7,6 @@
 ##
 
 from itertools import combinations
-import matplotlib.pyplot as plt
-import networkx as nx
 
 class DottedIntervalGraph():
 	"""
@@ -36,11 +34,11 @@ class DottedIntervalGraph():
 		"""
 		return iter(self.nodedict)
 
-	def __getitem__(self, key):
-		try:
-			return self.nodedict[key]
-		except KeyError:
-			raise KeyError
+	# def __getitem__(self, key):
+	# 	try:
+	# 		return self.nodedict[key]
+	# 	except KeyError:
+	# 		raise KeyError
 
 	def is_multigraph(self):
 		"""
@@ -86,24 +84,15 @@ class DottedIntervalGraph():
 		"""
 		del self.nodedict[name]
 
-	def graph_edges(self):
-		graph_edges = []
-		for node1, node2 in combinations(self.nodedict.items(), 2):
-			name1 = node1[0]
-			name2 = node2[0]
-			if self.has_edge(name1, name2):
-				graph_edges.append((name1, name2))
-		return graph_edges
-
 	def edges(self):
 		"""
 		returns an iterator over all edges in the graph
 		
 		@return __iter__
 		"""
-		graph_edges = self.graph_edges()
-		for edge in graph_edges:
-			yield edge
+		for name1, name2 in combinations(self.nodedict.keys(), 2):
+			if self.has_edge(name1, name2):
+				yield (name1, name2)
 	
 	# def neighbors(self, name):
 	# 	"""returns an iterator over all neighbours of node <name>,
@@ -128,8 +117,8 @@ class DottedIntervalGraph():
 		(offset1, period1, steps1) = self.nodedict[name1]
 		(offset2, period2, steps2) = self.nodedict[name2]
 		# construct set, check for item in other set if in first set
-		dotlist = [offset1 + x * period1 for x in range(0, steps1)]
-		for dot in [offset2 + x * period2 for x in range(0, steps2)]:
+		dotlist = [offset1 + x * period1 for x in range(steps1)]
+		for dot in [offset2 + x * period2 for x in range(steps2)]:
 			if dot in dotlist:
 				return True
 		return False
@@ -142,6 +131,9 @@ class DottedIntervalGraph():
 		@param filename = string
 		@param circular = bool
 		"""
+		import matplotlib.pyplot as plt
+		import networkx as nx
+
 		fig = plt.figure()
 		if circular:
 			nx.draw_circular(self, ax=fig.add_subplot(111))
