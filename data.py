@@ -11,6 +11,7 @@ import random as rn
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatch
 import numpy as np
+import networkx as nx
 import pickle
 
 def gen_DIG(nodes, iterations):
@@ -29,7 +30,7 @@ def gen_data(nodes, iterations):
 	edge_count_list = []
 	for i in range(1000):
 		g = gen_DIG(nodes, iterations)
-		edge_count_list.append(len(g.graph_edges()))
+		edge_count_list.append(len([1 for _ in g.edges()]))
 	return edge_count_list
 
 def gen_data_array(node_range, iter_range):
@@ -81,9 +82,45 @@ def test_edge_likelihood(gen):
 	iter_range = range(4,41,4)
 	if gen:
 		gen_data_array(node_range,iter_range)
+		return
 	make_figure(node_range,iter_range)
 
-test_edge_likelihood(False)
+# test_edge_likelihood(True)
+
+AF = {"clique":nx.graph_clique_number}
+
+def DIGtoNX(graph):
+	G = nx.Graph()
+	for node in graph:
+		G.add_node(node)
+	for edge in graph.edges():
+		G.add_edge(*edge)
+	return G
+
+def gen_attribute_dict(amount_of_graphs = 1000, nodes = 10, iterations = 15, p_edge = 0.5):
+	attr_dict = {"DIGdata":{}, "NXdata":{}}
+	for attr in AF:
+		attr_dict["DIGdata"][attr] = []
+		attr_dict["NXdata"][attr] = []
+	for i in range(amount_of_graphs):
+		# generate graphs
+		DIGgraph = DIGtoNX(gen_DIG(nodes, iterations))
+		NXgraph = nx.fast_gnp_random_graph(nodes, p_edge)
+
+		for attr in AF:
+			function = AF[attr]
+			attr_dict["DIGdata"][attr].append(function(DIGgraph))
+			attr_dict["NXdata"][attr].append(function(NXgraph))
+
+		if i % 100 == 0: print("Finished", i, "graphs")
+	return attr_dict
+
+def test_attributes():
+	attr_dict = gen_attribute_dict()
+	print(np.mean(attr_dict["DIGdata"]["clique"]))
+	print(np.mean(attr_dict["NXdata"]["clique"]))
+
+test_attributes()
 
 
 # def test_p():
