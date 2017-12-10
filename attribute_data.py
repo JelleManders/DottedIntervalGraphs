@@ -16,14 +16,19 @@ def autolabel(rects):
 
 def draw_attr_graph(AD):
 	"""
-
+	this function takes the attr_data as its only argument, a dictionary of 
+	the form {"attr":{"DIG":[mean, std_dev], "NX":[mean, std_dev]},
+	          "attr2":{"DIG":[mean, std_dev], "NX":[mean, std_dev]},
+	          etc...}
+	and use this data to construct a barchart highlighting the differences
+	between networkx and DottedIntervalGraphs
 	"""
 	N = len(AD)
 	DIG_means = tuple([AD[attr]["DIG"][0] for attr in AD])
 	DIG_std = tuple([AD[attr]["DIG"][1] for attr in AD])
 
 	ind = np.arange(N)  # the x locations for the groups
-	width = 0.35       # the width of the bars
+	width = 0.45       # the width of the bars
 
 	fig, ax = plt.subplots()
 	rects1 = ax.bar(ind, DIG_means, width, color='r', yerr=DIG_std)
@@ -36,7 +41,7 @@ def draw_attr_graph(AD):
 	ax.set_ylabel('Value')
 	ax.set_title('Average values of different plot attributes')
 	ax.set_xticks(ind + width / 2)
-	ax.set_xticklabels(tuple([attr for attr in AD]))
+	ax.set_xticklabels(tuple([attr for attr in AD]), rotation=-45)
 
 	ax.legend((rects1[0], rects2[0]), ('DIG', 'NX'))
 
@@ -44,9 +49,10 @@ def draw_attr_graph(AD):
 		for rect in rects:
 			height = rect.get_height()
 			ax.text(rect.get_x() + rect.get_width()/2., height/10.,
-					'%d' % int(height),
+					'%.2f' % height,
 					ha='center', va='bottom', bbox=dict(facecolor='white', alpha=0.5))
 
+	plt.tight_layout()
 	plt.show()
 
 def DIGtoNX(graph):
@@ -89,6 +95,8 @@ def test_attr(function, graphs):
 	the result of this function in a list and return the list.
 	"""
 	test_results = [function(graph) for graph in graphs]
+	# filter any None, these may have slipped in if the function raised an error
+	test_results = list(filter(lambda x: x != None, test_results))
 	return [np.mean(test_results), np.std(test_results)]
 
 def get_attr_data(AF, test_settings = (1000, 15, 10, 0.5)):
@@ -103,6 +111,7 @@ def get_attr_data(AF, test_settings = (1000, 15, 10, 0.5)):
 	iterations = test_settings[1]
 	nodes      = test_settings[2]
 	p_edge     = test_settings[3]
+	# generate the lists of graphs using the settings
 	DIG_graphs = gen_DIGs(N_tests, iterations, nodes)
 	NX_graphs  = gen_NXs(N_tests, nodes, p_edge)
 
@@ -110,16 +119,34 @@ def get_attr_data(AF, test_settings = (1000, 15, 10, 0.5)):
 	for attr in AF:
 		attr_func = AF[attr]
 		attr_data[attr] = {}
+		# fill in the data in the dict
 		attr_data[attr]["DIG"] = test_attr(attr_func, DIG_graphs)
 		attr_data[attr]["NX"]  = test_attr(attr_func, NX_graphs)
 	return attr_data
 
-def show_attribute_data():
-	AF = {"clique":nx.graph_clique_number}
+def diameter(graph):
+	"""
+	wrapper for the nx.diameter function to prevent errors when the diameter is
+	infinitely high since the graph may be disconnected. In this case, return
+	None. This value will later be filtered out when calculating the mean.
+	"""
+	try:
+		return nx.diameter(graph)
+	except Exception:
+		return None
+
+def show_attribute_data(AF):
 	attr_data = get_attr_data(AF)
 	draw_attr_graph(attr_data)
 
-show_attribute_data()
+AF = {"clique":nx.graph_clique_number,
+	"connected components":nx.number_connected_components,
+	"diameter*":diameter,
+	"node connectivity":nx.node_connectivity,
+	"edge connectivity":nx.edge_connectivity,
+	}
+
+show_attribute_data(AF)
 
 # get_attr_data({"attr1":"func1","attr2":"func2"}, "DIG_graphs", "NX_graphs")
 
