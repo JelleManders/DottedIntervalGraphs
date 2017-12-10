@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# test files of any kind
+test.*
+
 # pickled files
 *.pickle
 
