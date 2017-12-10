@@ -1,8 +1,19 @@
+##
+#  attribute_data.py
+#  Class that generates data on DIGs and other networkx graphs, specifically
+#  testing them for a pre-determined set of attributes. It collects the result
+#  in a clear figure that is then shown.
+#
+#  @author Jelle Manders - github.com/jellemanders
+#  @date   2017-11
+##
+
 import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
 import random as rn
 from DIG import DottedIntervalGraph as DIG
+import storage as st
 
 def autolabel(rects):
 	"""
@@ -24,8 +35,8 @@ def draw_attr_graph(AD):
 	between networkx and DottedIntervalGraphs
 	"""
 	N = len(AD)
-	DIG_means = tuple([AD[attr]["DIG"][0] for attr in AD])
-	DIG_std = tuple([AD[attr]["DIG"][1] for attr in AD])
+	DIG_means = tuple([AD[attr]['DIG'][0] for attr in AD])
+	DIG_std = tuple([AD[attr]['DIG'][1] for attr in AD])
 
 	ind = np.arange(N)  # the x locations for the groups
 	width = 0.45       # the width of the bars
@@ -33,8 +44,8 @@ def draw_attr_graph(AD):
 	fig, ax = plt.subplots()
 	rects1 = ax.bar(ind, DIG_means, width, color='r', yerr=DIG_std)
 
-	NX_means = tuple([AD[attr]["NX"][0] for attr in AD])
-	NX_std = tuple([AD[attr]["NX"][1] for attr in AD])
+	NX_means = tuple([AD[attr]['NX'][0] for attr in AD])
+	NX_std = tuple([AD[attr]['NX'][1] for attr in AD])
 	rects2 = ax.bar(ind + width, NX_means, width, color='b', yerr=NX_std)
 
 	# add some text for labels, title and axes ticks
@@ -135,9 +146,12 @@ def diameter(graph):
 	except Exception:
 		return None
 
-def show_attribute_data(AF):
-	attr_data = get_attr_data(AF)
-	draw_attr_graph(attr_data)
+def show_attribute_data(AF, filename):
+	attr_data = st.get_data(filename)
+	if not attr_data[0]:
+		attr_data = get_attr_data(AF)
+		st.store_data(attr_data, filename)
+	draw_attr_graph(attr_data[1])
 
 AF = {"clique":nx.graph_clique_number,
 	"connected components":nx.number_connected_components,
@@ -146,7 +160,7 @@ AF = {"clique":nx.graph_clique_number,
 	"edge connectivity":nx.edge_connectivity,
 	}
 
-show_attribute_data(AF)
+show_attribute_data(AF, 'attribute_data.pickle')
 
 # get_attr_data({"attr1":"func1","attr2":"func2"}, "DIG_graphs", "NX_graphs")
 
