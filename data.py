@@ -120,7 +120,7 @@ def test_attributes():
 	print(np.mean(attr_dict["DIGdata"]["clique"]))
 	print(np.mean(attr_dict["NXdata"]["clique"]))
 
-test_attributes()
+# test_attributes()
 
 
 # def test_p():

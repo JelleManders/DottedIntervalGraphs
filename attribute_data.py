@@ -25,7 +25,7 @@ def autolabel(rects):
 				'%d' % int(height),
 				ha='center', va='bottom', bbox=dict(facecolor='white', alpha=0.5))
 
-def draw_attr_graph(AD):
+def draw_attr_graph(AD, filename):
 	"""
 	this function takes the attr_data as its only argument, a dictionary of 
 	the form {"attr":{"DIG":[mean, std_dev], "NX":[mean, std_dev]},
@@ -43,6 +43,7 @@ def draw_attr_graph(AD):
 
 	fig, ax = plt.subplots()
 	rects1 = ax.bar(ind, DIG_means, width, color='r', yerr=DIG_std)
+	print("plotting", DIG_means)
 
 	NX_means = tuple([AD[attr]['NX'][0] for attr in AD])
 	NX_std = tuple([AD[attr]['NX'][1] for attr in AD])
@@ -64,9 +65,16 @@ def draw_attr_graph(AD):
 					ha='center', va='bottom', bbox=dict(facecolor='white', alpha=0.5))
 
 	plt.tight_layout()
-	plt.show()
+	# plt.show()
+
+	filename = filename[:-7]+".png"
+	print("Saved image in", filename)
+	plt.savefig(filename)
 
 def DIGtoNX(graph):
+	"""
+	Generates a standard networkx graph from a DIG
+	"""
 	G = nx.Graph()
 	for node in graph:
 		G.add_node(node)
@@ -75,6 +83,9 @@ def DIGtoNX(graph):
 	return G
 
 def gen_DIG(nodes, iterations):
+	"""
+	Gnerates a random DIG with n <nodes> and i <iterations>
+	"""
 	G = DIG()
 	for n in range(nodes):
 		sequence = gen_seq(iterations)
@@ -82,6 +93,9 @@ def gen_DIG(nodes, iterations):
 	return G
 
 def gen_seq(iterations):
+	"""
+	generates a random sequence with a given amount of iterations
+	"""
 	o = rn.randint(0,50)
 	k = 2**(rn.randint(2,5))+1
 	return (o,k,iterations)
@@ -110,7 +124,7 @@ def test_attr(function, graphs):
 	test_results = list(filter(lambda x: x != None, test_results))
 	return [np.mean(test_results), np.std(test_results)]
 
-def get_attr_data(AF, test_settings = (1000, 15, 10, 0.5)):
+def get_attr_data(AF, test_settings):
 	"""
 	This function generates two lists containing randomly generated nx graphs
 	and as many DIG_graphs, converted to nx for testing purposes. It will then
@@ -118,10 +132,10 @@ def get_attr_data(AF, test_settings = (1000, 15, 10, 0.5)):
 	a dictionary containing the mean and standard deviation of the result of the
 	functions, which is then returned.
 	"""
-	N_tests    = test_settings[0]
-	iterations = test_settings[1]
-	nodes      = test_settings[2]
-	p_edge     = test_settings[3]
+	N_tests    = test_settings['graphs']
+	iterations = test_settings['iterations']
+	nodes      = test_settings['nodes']
+	p_edge     = test_settings['p_edge']
 	# generate the lists of graphs using the settings
 	DIG_graphs = gen_DIGs(N_tests, iterations, nodes)
 	NX_graphs  = gen_NXs(N_tests, nodes, p_edge)
@@ -133,7 +147,8 @@ def get_attr_data(AF, test_settings = (1000, 15, 10, 0.5)):
 		# fill in the data in the dict
 		attr_data[attr]["DIG"] = test_attr(attr_func, DIG_graphs)
 		attr_data[attr]["NX"]  = test_attr(attr_func, NX_graphs)
-	return attr_data
+	# return true labelled list to indicate success
+	return [True, attr_data]
 
 def diameter(graph):
 	"""
@@ -146,12 +161,23 @@ def diameter(graph):
 	except Exception:
 		return None
 
-def show_attribute_data(AF, filename):
+def gen_filename(settings):
+	filename = "data/5-"
+	filename += "g=" + str(settings['graphs']) + "_"
+	filename += "n=" + str(settings['nodes']) + "_"
+	filename += "i=" + str(settings['iterations']) + "_"
+	filename += "p=" + str(settings['p_edge']) + ".pickle"
+	return filename
+
+def show_attribute_data(AF, settings):
+	filename = gen_filename(settings)
+	# attribute data is stored as [<Bool>, ?<Data>]
+	# the bool indicates failure if the file is not found, therefore Data is optional
 	attr_data = st.get_data(filename)
 	if not attr_data[0]:
-		attr_data = get_attr_data(AF)
-		st.store_data(attr_data, filename)
-	draw_attr_graph(attr_data[1])
+		attr_data = get_attr_data(AF, settings)
+		st.store_data(attr_data[1], filename)
+	draw_attr_graph(attr_data[1], filename)
 
 AF = {"clique":nx.graph_clique_number,
 	"connected components":nx.number_connected_components,
@@ -160,7 +186,14 @@ AF = {"clique":nx.graph_clique_number,
 	"edge connectivity":nx.edge_connectivity,
 	}
 
-show_attribute_data(AF, 'attribute_data.pickle')
+test_settings = [{'nodes':10, 'graphs':10000, 'iterations':8,  'p_edge':0.3},
+ {'nodes':10, 'graphs':10000, 'iterations':14, 'p_edge':0.5},
+ {'nodes':10, 'graphs':10000, 'iterations':40, 'p_edge':0.7}]
+
+for setting in test_settings:
+	print("Working on", str(setting['p_edge']), "...")
+	show_attribute_data(AF, setting)
+print("Done!")
 
 # get_attr_data({"attr1":"func1","attr2":"func2"}, "DIG_graphs", "NX_graphs")
 
