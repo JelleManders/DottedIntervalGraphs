@@ -22,12 +22,12 @@ def get_title(attr, params, g, D):
 					"connected":"Number of Connected Components per Node",
 					"degree":"Average Degree"}
 	param = params[0][:1]
-	title = ("Effect of varying the " + 
+	title = ("D = "+str(D)+": Effect of varying the " + 
 			param_lookup[param]+ 
 			" parameter on the\n" + 
 			attr_lookup[attr]+ 
 			" of both types of graph")
-	filename = str(g) + "_graphs-attr_"+attr+"-D_3-"+param
+	filename = str(g) + "_graphs-attr_"+attr+"-D_"+str(D)+"-"+param
 	return [title, filename]
 
 def get_labels(params, probs):
@@ -46,12 +46,12 @@ def autolabel(rects):
 				'%d' % int(height),
 				ha='center', va='bottom', bbox=dict(facecolor='white', alpha=0.5))
 
-def draw_attr_graphs(DIG_data, NX_data, params, probs, g):
+def draw_attr_graphs(DIG_data, NX_data, params, probs, D, g, comp):
 	result_chunk = DIG_data[params[0]]
 	for attribute in result_chunk:
-		create_graph(DIG_data, NX_data, attribute, params, probs, g)
+		create_graph(DIG_data, NX_data, attribute, params, probs, D, g, comp)
 
-def create_graph(DIG_data, NX_data, attr, params, probs, D, g):
+def create_graph(DIG_data, NX_data, attr, params, probs, D, g, comp):
 	N = len(DIG_data)
 	DIG_means = tuple(DIG_data[param][attr][0] for param in params)
 	DIG_std = tuple(DIG_data[param][attr][1] for param in params)
@@ -66,7 +66,7 @@ def create_graph(DIG_data, NX_data, attr, params, probs, D, g):
 	NX_std = tuple(NX_data[param][attr][1] for param in params)
 	rects2 = ax.bar(ind + width, NX_means, width, color='b', yerr=NX_std)
 
-	title = get_title(attr, params, g)
+	title = get_title(attr, params, g, D)
 
 	# add some text for labels, title and axes ticks
 	ax.set_ylabel('Value')
@@ -88,9 +88,11 @@ def create_graph(DIG_data, NX_data, attr, params, probs, D, g):
 
 	header = "images/comp-" if comp else "images/"
 
-	filename = header+title[1]+".png"
+	filename = "final_"+header+title[1]+".png"
 	print("Saved image in", filename)
 	plt.savefig(filename)
+
+	plt.close()
 
 def test_attr(function, graphs):
 	"""
@@ -209,12 +211,12 @@ def exec_test(graphs, param, D, values, comp):
 
 	DIGs = {}
 	NXs = {}
-	print("Generating graphs...")
+	# print("Generating graphs...")
 	for s in settings:
 		DIGs[param+str(s[param])] = gen_DIGs(s["O"], s["D"], s["K"], s["V"], s["G"])
 		NXs[param+str(s[param])] = gen_NXs(s["V"], s["P"], s["G"])
 
-	print("Done generating graphs!")
+	# print("Done generating graphs!")
 
 	AF = {
 		"eccentricity": eccentricity,
@@ -223,28 +225,33 @@ def exec_test(graphs, param, D, values, comp):
 		"connected":connected
 	}
 
-	print("Generating DIG data...")
+	# print("Generating DIG data...")
 	DIG_data = gen_data(DIGs, AF)
 
-	print("Generating NX data...")
+	# print("Generating NX data...")
 	NX_data = gen_data(NXs, AF)
 
-	print("Done generating, starting graphs...")
+	# print("Done generating, starting graphs...")
 
-	draw_attr_graphs(DIG_data, NX_data, params, probs, D, graphs)
+	draw_attr_graphs(DIG_data, NX_data, params, probs, D, graphs, comp)
 
 def run():
 
 	OK_values = [2,4,6,8]
 	D_values = [2,3,4]
+	n = 1
 
 	print("Starting....")
 	for param in ["O", "K"]:
-		print('.', end='')
 		for D_val in D_values:
-			print('.', end='')
+			print(str(n) + ' -> ', end='')
+			n += 1
+			# print(param,D_val,OK_values,False)
 			exec_test(1000, param, D_val, OK_values, False)
-			print('.', end='')
+
+			print(str(n) + ' -> ', end='')
+			n += 1
+			# print(param,D_val,OK_values,True)
 			exec_test(1000, param, D_val, OK_values, True)
 	print('DONE!')
 

@@ -14,7 +14,7 @@ def get_data(path):
 	try:
 		with open(path, 'rb') as f:
 			data = pickle.load(f)
-			print('found data -> '+path)
+			# print('found data -> '+path)
 			return [True, data]
 	except Exception:
 		return [False]
