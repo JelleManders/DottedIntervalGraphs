@@ -11,6 +11,7 @@ test.*
 
 # images and figures
 *.png
+*.pdf
 
 # C extensions
 *.so
