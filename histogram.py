@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 from DIG import DottedIntervalGraph as DIG
 from pprint import pprint
 
-def create_graph(DIG_data, NX_empty_data, NX_full_data, attribute, o,d,k):
+def create_graph(DIG_data, NX_empty_data, NX_full_data, attribute, o,d,k, graphs):
 	N = len(DIG_data)   # The amount of points on the x-axis
 
 	ind = np.arange(N)  # the x locations for the groups
@@ -38,7 +38,7 @@ def create_graph(DIG_data, NX_empty_data, NX_full_data, attribute, o,d,k):
 
 	plt.tight_layout()
 
-	filename = "images/hists/histogram_"+attribute+"-O="+str(o)+'-D='+str(d)+"-K="+str(k)+".png"
+	filename = "images/hists/histogram_"+attribute+"-G="+str(graphs)+"-O="+str(o)+'-D='+str(d)+"-K="+str(k)+".png"
 	print("Saved image in", filename)
 	plt.savefig(filename)
 
@@ -53,6 +53,7 @@ def DIGtoNX(graph):
 		G.add_node(node)
 	for edge in graph.edges():
 		G.add_edge(*edge)
+	print("Did one...")
 	return G
 
 def gen_DIG(o, d, k, v):
@@ -102,7 +103,9 @@ def gen_hist_data(graphs, function):
 
 def lookup_p(o, d, k, comp):
 	i = o*d*k
-	table = {16:0.14,24:0.17,32:0.20,36:0.21,48:0.24,64:0.28,72:0.30,96:0.36,108:0.40,128:0.5}
+	table = {16:0.14,24:0.17,32:0.20,36:0.21,
+	         48:0.24,64:0.28,72:0.30,96:0.36,
+	         108:0.40,128:0.5,  16*2*16:0.005}
 	if comp:
 		return 1 - table[i]
 	return table[i]
@@ -121,13 +124,14 @@ def get_complete_hist_data(DIGs, NXs_empty, NXs_full):
 		complete_hist_data["NX_e"][key] = NXs_empty[key] if key in NXs_empty else 0
 		complete_hist_data["NX_f"][key] = NXs_full[key] if key in NXs_full else 0
 	return complete_hist_data
-			
-for o in range(4,9,2):
-	for d in [1,2]:
-		for k in range(4,9,2):
-			DIGs = gen_DIGs(o,d,k,15,10000)
-			NXs_empty  = gen_NXs(15,lookup_p(o,d,k,False),10000)
-			NXs_full  = gen_NXs(15,lookup_p(o,d,k,True),10000)
+
+nodes = 1000
+for o in [16]:
+	for d in [2]:
+		for k in [16]:
+			DIGs = gen_DIGs(o,d,k,nodes,10)
+			NXs_empty  = gen_NXs(nodes,lookup_p(o,d,k,False),10)
+			NXs_full  = gen_NXs(nodes,lookup_p(o,d,k,True),10)
 
 			DIG_hist_data = gen_hist_data(DIGs, nx.degree)
 			NX_empty_hist_data  = gen_hist_data(NXs_empty, nx.degree)
@@ -135,4 +139,4 @@ for o in range(4,9,2):
 
 			complete_hist_data = get_complete_hist_data(DIG_hist_data, NX_empty_hist_data, NX_full_hist_data)
 
-			create_graph(complete_hist_data["DIG"], complete_hist_data["NX_e"], complete_hist_data["NX_f"], 'degree', o,d,k)
+			create_graph(complete_hist_data["DIG"], complete_hist_data["NX_e"], complete_hist_data["NX_f"], 'degree', o,d,k, graphs)
